@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Spendly — Track Every Rupee{% endblock %}
+
+{% block head %}
+<style>
+/* Stats strip */
+.stats-strip{background:var(--ink);padding:2.5rem 2rem}
+.stats-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;text-align:center}
+.stat-num{font-family:var(--font-display);font-size:2.2rem;color:var(--paper);margin-bottom:0.3rem}
+.stat-num span{color:var(--accent-2)}
+.stat-desc{font-size:0.82rem;color:var(--ink-faint);font-weight:500;letter-spacing:0.04em;text-transform:uppercase}
+
+/* Testimonials */
+.testimonials{padding:5rem 2rem;max-width:1200px;margin:0 auto}
+.section-label{text-align:center;font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem}
+.section-title{text-align:center;font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.4rem);color:var(--ink);margin-bottom:3rem}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.testi-card{background:var(--paper-card,#fff);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.75rem}
+.testi-quote{font-size:0.92rem;color:var(--ink-soft,#2d2d2d);line-height:1.7;margin-bottom:1.25rem;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:0.75rem}
+.testi-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:600;flex-shrink:0}
+.testi-name{font-size:0.82rem;font-weight:600;color:var(--ink)}
+.testi-role{font-size:0.75rem;color:var(--ink-faint)}
+
+/* CTA note */
+.cta-note{font-size:0.78rem;color:var(--ink-faint);margin-top:0.75rem}
+
+/* Scroll-reveal for feature cards */
+.feature-card{opacity:0;transform:translateY(24px)}
+.feature-card.visible{opacity:1;transform:translateY(0);transition:opacity 0.5s ease,transform 0.5s ease,box-shadow 0.25s,border-color 0.25s}
+.feature-card:nth-child(2){transition-delay:0.1s}
+.feature-card:nth-child(3){transition-delay:0.2s}
+
+@media(max-width:900px){
+    .stats-inner,.testi-grid{grid-template-columns:1fr}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-badge">Personal Finance Tracker</div>
+        <h1 class="hero-title">
+            Know where your<br>
+            <em>money goes</em>
+        </h1>
+        <p class="hero-subtitle">
+            Log expenses, understand your spending patterns,
+            and take control of your financial life —
+            one transaction at a time.
+        </p>
+        <div class="hero-actions">
+            <a href="{{ url_for('register') }}" class="btn-primary">Start tracking free</a>
+            <a href="{{ url_for('login') }}" class="btn-ghost">Sign in</a>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="mock-card">
+            <div class="mock-card-header">
+                <span class="mock-label">March 2026</span>
+                <span class="mock-total">₹12,450</span>
+            </div>
+            <div class="mock-bars">
+                <div class="mock-bar-row">
+                    <span class="mock-cat">Bills</span>
+                    <div class="mock-bar-track">
+                        <div class="mock-bar" style="width: 72%"></div>
+                    </div>
+                    <span class="mock-amt">₹4,500</span>
+                </div>
+                <div class="mock-bar-row">
+                    <span class="mock-cat">Food</span>
+                    <div class="mock-bar-track">
+                        <div class="mock-bar mock-bar-2" style="width: 52%"></div>
+                    </div>
+                    <span class="mock-amt">₹3,200</span>
+                </div>
+                <div class="mock-bar-row">
+                    <span class="mock-cat">Health</span>
+                    <div class="mock-bar-track">
+                        <div class="mock-bar mock-bar-3" style="width: 33%"></div>
+                    </div>
+                    <span class="mock-amt">₹2,050</span>
+                </div>
+                <div class="mock-bar-row">
+                    <span class="mock-cat">Transport</span>
+                    <div class="mock-bar-track">
+                        <div class="mock-bar mock-bar-4" style="width: 28%"></div>
+                    </div>
+                    <span class="mock-amt">₹1,800</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+    <div class="stats-inner">
+        <div>
+            <div class="stat-num" data-target="10000">0<span>+</span></div>
+            <div class="stat-desc">Users tracking expenses</div>
+        </div>
+        <div>
+            <div class="stat-num" data-target="200" data-prefix="₹" data-suffix="Cr+"><span>₹0Cr+</span></div>
+            <div class="stat-desc">Total rupees tracked</div>
+        </div>
+        <div>
+            <div class="stat-num" data-target="50">0<span>+</span></div>
+            <div class="stat-desc">Expense categories</div>
+        </div>
+    </div>
+</div>
+
+<section class="features">
+    <div class="features-inner">
+        <div class="feature-card">
+            <div class="feature-icon">₹</div>
+            <h3 class="feature-title">Log expenses instantly</h3>
+            <p class="feature-body">Add any expense in seconds. Category, amount, date, description — all in one simple form.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">◎</div>
+            <h3 class="feature-title">Understand your patterns</h3>
+            <p class="feature-body">See exactly where your money goes with category breakdowns and monthly summaries.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">◷</div>
+            <h3 class="feature-title">Filter by time period</h3>
+            <p class="feature-body">View your spending for any date range — last week, last month, or a custom period.</p>
+        </div>
+    </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+    <p class="section-label">What users say</p>
+    <h2 class="section-title">Trusted by thousands</h2>
+    <div class="testi-grid">
+        <div class="testi-card">
+            <p class="testi-quote">"Finally an expense tracker that doesn't feel overwhelming. I logged my first expense in under 10 seconds."</p>
+            <div class="testi-author">
+                <div class="testi-avatar" style="background:var(--accent-light);color:var(--accent)">NK</div>
+                <div>
+                    <div class="testi-name">Nitish Kumar</div>
+                    <div class="testi-role">Software Engineer, Pune</div>
+                </div>
+            </div>
+        </div>
+        <div class="testi-card">
+            <p class="testi-quote">"Spendly helped me realise I was spending ₹8,000 a month on food delivery. Cut it in half within 2 months."</p>
+            <div class="testi-author">
+                <div class="testi-avatar" style="background:var(--accent-2-light);color:var(--accent-2)">PS</div>
+                <div>
+                    <div class="testi-name">Priya Sharma</div>
+                    <div class="testi-role">Freelance Designer, Mumbai</div>
+                </div>
+            </div>
+        </div>
+        <div class="testi-card">
+            <p class="testi-quote">"The category breakdown is genuinely eye-opening. I had no idea transport was eating 30% of my budget."</p>
+            <div class="testi-author">
+                <div class="testi-avatar" style="background:#eaf0f7;color:#5b7fa6">AR</div>
+                <div>
+                    <div class="testi-name">Arjun Rao</div>
+                    <div class="testi-role">MBA Student, Bangalore</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="cta-inner">
+        <h2 class="cta-title">Ready to take control?</h2>
+        <p class="cta-body">Join thousands of people who track their expenses with Spendly. Free forever.</p>
+        <a href="{{ url_for('register') }}" class="btn-primary">Create free account</a>
+        <p class="cta-note">No credit card required · Takes 30 seconds</p>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Scroll-reveal for feature cards
+const featureObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.15});
+document.querySelectorAll('.feature-card').forEach(c => featureObserver.observe(c));
+
+// Count-up animation for stats
+const statsObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    const target = parseInt(el.dataset.target);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '+';
+    let start = 0;
+    const duration = 1200;
+    const step = (timestamp) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(eased * target);
+      const display = target >= 1000 ? (current/1000).toFixed(current >= target ? 0 : 1) + 'K' : current;
+      el.innerHTML = prefix + display + '<span>' + suffix + '</span>';
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    statsObserver.unobserve(el);
+  });
+}, {threshold: 0.5});
+document.querySelectorAll('.stat-num[data-target]').forEach(el => statsObserver.observe(el));
+</script>
+{% endblock %}
