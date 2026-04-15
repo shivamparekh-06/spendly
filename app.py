@@ -2,6 +2,12 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
+# Initialize database
+from database.db import init_db, seed_db
+with app.app_context():
+    init_db()
+    seed_db()
+
 
 # ------------------------------------------------------------------ #
 # Routes                                                              #
