@@ -18,6 +18,13 @@
             {% endif %}
 
             <form method="POST" action="/register">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, msg in messages %}
+                            <div class="flash-{{ category }}">{{ msg }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
                 <div class="form-group">
                     <label for="name">Full name</label>
                     <input type="text" id="name" name="name"
