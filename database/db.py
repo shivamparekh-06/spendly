@@ -3,10 +3,28 @@
 
 import os
 import sqlite3
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin, LoginManager
 
 # Path to the SQLite database file (project root)
 _DB_PATH = os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")), "spendly.db")
+
+# Flask-Login setup
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+
+
+class User(UserMixin):
+    """User model for Flask-Login."""
+    def __init__(self, id, name, email, password_hash):
+        self.id = id
+        self.name = name
+        self.email = email
+        self.password_hash = password_hash
+
+    def check_password(self, password):
+        """Check password against hash."""
+        return check_password_hash(self.password_hash, password)
 
 
 def _execute(sql, params=()):
@@ -24,6 +42,29 @@ def get_db():
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
+
+
+def get_user_by_email(email):
+    """Return a user row matching the given email, or None if not found."""
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT id, name, email, password_hash FROM users WHERE email = ?', (email,))
+    return cur.fetchone()
+
+
+# Flask-Login user loader
+login_manager = LoginManager()
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Load user by ID for Flask-Login."""
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name, email, password_hash FROM users WHERE id = ?", (user_id,))
+    row = cur.fetchone()
+    if row:
+        return User(row['id'], row['name'], row['email'], row['password_hash'])
+    return None
 
 
 def init_db():

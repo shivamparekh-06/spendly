@@ -370,6 +370,17 @@ a { color: inherit; text-decoration: none; }
 
 /* ------------------------------------------------------------------ */
 /* Auth pages                                                          */
+
+/* Field error styling */
+.form-input.error {
+    border-color: var(--danger);
+}
+.error-message {
+    color: var(--danger);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+}
 /* ------------------------------------------------------------------ */
 
 .auth-section {
