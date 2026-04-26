@@ -14,7 +14,7 @@
 
         <div class="auth-card">
             {% if error %}
-            <div class="auth-error">{{ error }}</div>
+            <!-- Field-level error rendered below email input -->
             {% endif %}
 
             <form method="POST" action="/register">
@@ -34,8 +34,9 @@
                 <div class="form-group">
                     <label for="email">Email address</label>
                     <input type="email" id="email" name="email"
-                           class="form-input" placeholder="nitish@example.com"
-                           required>
+                           class="form-input{% if error %} error{% endif %}" placeholder="nitish@example.com"
+                           required aria-invalid="{% if error %}true{% else %}false{% endif %}" aria-describedby="email-error">
+                    {% if error %}<div id="email-error" class="error-message">{{ error }}</div>{% endif %}
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
