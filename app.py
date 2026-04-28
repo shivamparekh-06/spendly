@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from werkzeug.security import generate_password_hash
-from database.db import init_db, seed_db, get_db
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from database.db import init_db, seed_db, get_db, login_manager, User, get_user_by_email
 
 app = Flask(__name__)
 app.secret_key = 'dev-secret'  # In production, use a secure env variable
+
+# Initialize Flask-Login
+login_manager.init_app(app)
 
 # Initialize database
 with app.app_context():
@@ -20,6 +24,7 @@ def landing():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    # Allow access to registration page even if already logged in
     if request.method == "POST":
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
@@ -52,8 +57,21 @@ def register():
     # GET request
     return render_template('register.html')
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    # Redirect authenticated users away from login page
+    if current_user.is_authenticated:
+        return redirect(url_for('landing'))
+    if request.method == "POST":
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        user_row = get_user_by_email(email)
+        if user_row and check_password_hash(user_row['password_hash'], password):
+            login_user(User(user_row['id'], user_row['name'], user_row['email'], user_row['password_hash']))
+            flash('Successfully logged in', 'success')
+            return redirect(url_for('landing'))
+        else:
+            flash('Invalid email or password.', 'error')
     return render_template("login.html")
 
 # ------------------------------------------------------------------ #
@@ -61,8 +79,11 @@ def login():
 # ------------------------------------------------------------------ #
 
 @app.route("/logout")
+@login_required
 def logout():
-    return "Logout — coming in Step 3"
+    logout_user()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('landing'))
 
 @app.route("/profile")
 def profile():
