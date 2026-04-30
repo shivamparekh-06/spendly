@@ -86,8 +86,9 @@ def logout():
     return redirect(url_for('landing'))
 
 @app.route("/profile")
+@login_required
 def profile():
-    return "Profile page — coming in Step 4"
+    return render_template('profile.html', user=current_user)
 
 @app.route("/expenses/add")
 def add_expense():
