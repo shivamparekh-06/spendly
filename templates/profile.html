@@ -3,89 +3,77 @@
 
 {% block content %}
 <div class="main-content profile-page">
-  <!-- User Info Card -->
-  <section class="profile-card">
-    <div class="avatar">{{ user.name[0] }}</div>
+
+  <!-- ===================== USER INFO ===================== -->
+  <section class="profile-card card">
+    <div class="avatar avatar-lg">{{ user.name[0] }}</div>
     <div class="user-details">
       <h2 class="user-name">{{ user.name }}</h2>
       <p class="user-email">{{ user.email }}</p>
     </div>
   </section>
 
-  <!-- Summary Stats -->
+  <!-- ===================== SUMMARY STATS ===================== -->
   <section class="summary-row">
-    <div class="summary-card">
-      <h3>Total Spent</h3>
-      <p class="stat-value">₹ 12,340</p>
+    <div class="summary-card card">
+      <h3 class="stat-label">Total Spent</h3>
+      <p class="stat-value text-primary">₹ 12,340</p>
     </div>
-    <div class="summary-card">
-      <h3>Transactions</h3>
-      <p class="stat-value">42</p>
+    <div class="summary-card card">
+      <h3 class="stat-label">Transactions</h3>
+      <p class="stat-value text-primary">42</p>
     </div>
-    <div class="summary-card">
-      <h3>Top Category</h3>
-      <p class="stat-value badge badge-food">Food &amp; Dining</p>
+    <div class="summary-card card">
+      <h3 class="stat-label">Top Category</h3>
+      <p class="stat-value text-primary">Food &amp; Dining</p>
     </div>
   </section>
 
-  <!-- Transaction History -->
+  <!-- ===================== RECENT TRANSACTIONS ===================== -->
   <section class="tx-section">
-    <h3>Recent Transactions</h3>
+    <h3 class="section-title">Recent Transactions</h3>
     <table class="tx-table">
       <thead>
         <tr>
           <th>Date</th>
           <th>Description</th>
           <th>Category</th>
-          <th class="right">Amount</th>
+          <th class="text-right">Amount</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>01 Apr 2026</td>
           <td>Grocery Store</td>
-          <td><span class="badge badge-food">Food</span></td>
-          <td class="right">₹ 2,500</td>
+          <td><span class="badge badge-primary">Food</span></td>
+          <td class="text-right">₹ 2,500</td>
         </tr>
         <tr>
           <td>28 Mar 2026</td>
           <td>Metro Card</td>
-          <td><span class="badge badge-transport">Transport</span></td>
-          <td class="right">₹ 150</td>
+          <td><span class="badge badge-secondary">Transport</span></td>
+          <td class="text-right">₹ 150</td>
         </tr>
         <tr>
           <td>27 Mar 2026</td>
           <td>Movie Night</td>
-          <td><span class="badge badge-entertainment">Entertainment</span></td>
-          <td class="right">₹ 350</td>
+          <td><span class="badge badge-accent">Entertainment</span></td>
+          <td class="text-right">₹ 350</td>
         </tr>
       </tbody>
     </table>
   </section>
 
-  <!-- Category Breakdown -->
+  <!-- ===================== CATEGORY BREAKDOWN ===================== -->
   <section class="category-section">
-    <h3>Spending by Category</h3>
-    <style>
-      .category-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-      }
-      .category-card {
-        background: var(--color-surface);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        padding: 0.75rem 1rem;
-        text-align: center;
-      }
-    </style>
+    <h3 class="section-title">Spending by Category</h3>
     <div class="category-grid">
-      <div class="category-card"><span class="badge badge-food">Food</span> – <strong>₹ 5,200</strong></div>
-      <div class="category-card"><span class="badge badge-transport">Transport</span> – <strong>₹ 800</strong></div>
-      <div class="category-card"><span class="badge badge-shopping">Shopping</span> – <strong>₹ 3,300</strong></div>
-      <div class="category-card"><span class="badge badge-bills">Bills &amp; Utilities</span> – <strong>₹ 2,040</strong></div>
+      <div class="category-card card"><span class="badge badge-primary">Food</span> – <strong>₹ 5,200</strong></div>
+      <div class="category-card card"><span class="badge badge-secondary">Transport</span> – <strong>₹ 800</strong></div>
+      <div class="category-card card"><span class="badge badge-accent">Shopping</span> – <strong>₹ 3,300</strong></div>
+      <div class="category-card card"><span class="badge badge-danger">Bills &amp; Utilities</span> – <strong>₹ 2,040</strong></div>
     </div>
   </section>
+
 </div>
 {% endblock %}

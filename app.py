@@ -88,7 +88,38 @@ def logout():
 @app.route("/profile")
 @login_required
 def profile():
-    return render_template('profile.html', user=current_user)
+    # Gather statistics for the logged‑in user
+    db = get_db()
+    user_id = current_user.id
+
+    # Total spent & transaction count
+    total_row = db.execute('SELECT SUM(amount) AS total, COUNT(*) AS cnt FROM expenses WHERE user_id = ?', (user_id,)).fetchone()
+    total_spent = total_row['total'] or 0
+    tx_count = total_row['cnt'] or 0
+
+    # Recent transactions (latest 5)
+    recent_tx = db.execute('SELECT date, description, category, amount FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT 5', (user_id,)).fetchall()
+
+    # Category breakdown – amount and percentage
+    cat_rows = db.execute('SELECT category, SUM(amount) AS amt FROM expenses WHERE user_id = ? GROUP BY category', (user_id,)).fetchall()
+    total_for_pct = total_spent or 1  # avoid division by zero
+    category_breakdown = []
+    for row in cat_rows:
+        pct = round((row['amt'] / total_for_pct) * 100, 1)
+        category_breakdown.append((row['category'], row['amt'], pct))
+
+    # Top category (by amount)
+    top_category = max(cat_rows, key=lambda r: r['amt'])['category'] if cat_rows else '—'
+
+    return render_template(
+        'profile.html',
+        user=current_user,
+        total_spent=total_spent,
+        tx_count=tx_count,
+        top_category=top_category,
+        recent_tx=recent_tx,
+        category_breakdown=category_breakdown,
+    )
 
 @app.route("/expenses/add")
 def add_expense():
