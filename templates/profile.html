@@ -66,12 +66,26 @@
   <!-- Category Breakdown -->
   <section class="category-section">
     <h3>Spending by Category</h3>
-    <ul class="category-list">
-      <li><span class="badge badge-food">Food</span> – ₹ 5,200</li>
-      <li><span class="badge badge-transport">Transport</span> – ₹ 800</li>
-      <li><span class="badge badge-shopping">Shopping</span> – ₹ 3,300</li>
-      <li><span class="badge badge-bills">Bills &amp; Utilities</span> – ₹ 2,040</li>
-    </ul>
+    <style>
+      .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+      }
+      .category-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        padding: 0.75rem 1rem;
+        text-align: center;
+      }
+    </style>
+    <div class="category-grid">
+      <div class="category-card"><span class="badge badge-food">Food</span> – <strong>₹ 5,200</strong></div>
+      <div class="category-card"><span class="badge badge-transport">Transport</span> – <strong>₹ 800</strong></div>
+      <div class="category-card"><span class="badge badge-shopping">Shopping</span> – <strong>₹ 3,300</strong></div>
+      <div class="category-card"><span class="badge badge-bills">Bills &amp; Utilities</span> – <strong>₹ 2,040</strong></div>
+    </div>
   </section>
 </div>
 {% endblock %}
