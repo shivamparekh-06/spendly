@@ -4,6 +4,23 @@
 {% block content %}
 <div class="main-content profile-page">
 
+  <!-- Filter Bar -->
+  <section class="filter-bar">
+    <form method="get" class="filter-form">
+      <div class="preset-buttons">
+        <a href="{{ url_for('profile') }}" class="btn-ghost {% if not date_from and not date_to %}active{% endif %}">All Time</a>
+        <a href="{{ url_for('profile', date_from=this_month_start, date_to=this_month_end) }}" class="btn-ghost {% if date_from == this_month_start and date_to == this_month_end %}active{% endif %}">This Month</a>
+        <a href="{{ url_for('profile', date_from=last_3_months_start, date_to=last_3_months_end) }}" class="btn-ghost {% if date_from == last_3_months_start and date_to == last_3_months_end %}active{% endif %}">Last 3 Months</a>
+        <a href="{{ url_for('profile', date_from=last_6_months_start, date_to=last_6_months_end) }}" class="btn-ghost {% if date_from == last_6_months_start and date_to == last_6_months_end %}active{% endif %}">Last 6 Months</a>
+      </div>
+      <div class="custom-range">
+        <input type="date" name="date_from" value="{{ date_from|default('') }}" placeholder="From" />
+        <input type="date" name="date_to" value="{{ date_to|default('') }}" placeholder="To" />
+        <button type="submit" class="btn-primary">Apply</button>
+      </div>
+    </form>
+  </section>
+
   <!-- ===================== USER INFO ===================== -->
   <section class="profile-card card">
     <div class="avatar avatar-lg">{{ user.name[0] }}</div>
@@ -17,15 +34,15 @@
   <section class="summary-row">
     <div class="summary-card card">
       <h3 class="stat-label">Total Spent</h3>
-      <p class="stat-value text-primary">₹ 12,340</p>
+      <p class="stat-value text-primary">₹ {{ "{:,.2f}".format(total_spent) }}</p>
     </div>
     <div class="summary-card card">
       <h3 class="stat-label">Transactions</h3>
-      <p class="stat-value text-primary">42</p>
+      <p class="stat-value text-primary">{{ tx_count }}</p>
     </div>
     <div class="summary-card card">
       <h3 class="stat-label">Top Category</h3>
-      <p class="stat-value text-primary">Food &amp; Dining</p>
+      <p class="stat-value text-primary">{{ top_category }}</p>
     </div>
   </section>
 
@@ -42,25 +59,18 @@
         </tr>
       </thead>
       <tbody>
+        {% for tx in recent_tx %}
         <tr>
-          <td>01 Apr 2026</td>
-          <td>Grocery Store</td>
-          <td><span class="badge badge-primary">Food</span></td>
-          <td class="text-right">₹ 2,500</td>
+          <td>{{ tx.date }}</td>
+          <td>{{ tx.description }}</td>
+          <td><span class="badge badge-{{ tx.category|lower|replace(' ', '-') }}">{{ tx.category }}</span></td>
+          <td class="text-right amount-cell">₹ {{ "{:,.2f}".format(tx.amount) }}</td>
         </tr>
-        <tr>
-          <td>28 Mar 2026</td>
-          <td>Metro Card</td>
-          <td><span class="badge badge-secondary">Transport</span></td>
-          <td class="text-right">₹ 150</td>
-        </tr>
-        <tr>
-          <td>27 Mar 2026</td>
-          <td>Movie Night</td>
-          <td><span class="badge badge-accent">Entertainment</span></td>
-          <td class="text-right">₹ 350</td>
-        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center">No transactions in this period.</td></tr>
+        {% endfor %}
       </tbody>
+      
     </table>
   </section>
 
@@ -68,10 +78,14 @@
   <section class="category-section">
     <h3 class="section-title">Spending by Category</h3>
     <div class="category-grid">
-      <div class="category-card card"><span class="badge badge-primary">Food</span> – <strong>₹ 5,200</strong></div>
-      <div class="category-card card"><span class="badge badge-secondary">Transport</span> – <strong>₹ 800</strong></div>
-      <div class="category-card card"><span class="badge badge-accent">Shopping</span> – <strong>₹ 3,300</strong></div>
-      <div class="category-card card"><span class="badge badge-danger">Bills &amp; Utilities</span> – <strong>₹ 2,040</strong></div>
+      {% for cat, amt, pct in category_breakdown %}
+      <div class="category-card card">
+        <span class="category-name">{{ cat }}</span>
+        <span class="category-amount">₹ {{ "%.2f"|format(amt) }}</span>
+      </div>
+      {% else %}
+      <div class="category-card card">No categories in this period.</div>
+      {% endfor %}
     </div>
   </section>
 

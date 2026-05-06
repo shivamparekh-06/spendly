@@ -85,23 +85,83 @@ def logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('landing'))
 
+from datetime import datetime, timedelta
+
 @app.route("/profile")
 @login_required
 def profile():
-    # Gather statistics for the logged‑in user
+    # Gather statistics for the logged‑in user with optional date filter
     db = get_db()
     user_id = current_user.id
 
+    # Parse and validate date range from query parameters
+    date_from_str = request.args.get('date_from')
+    date_to_str = request.args.get('date_to')
+    date_from = None
+    date_to = None
+    error = None
+    if date_from_str:
+        try:
+            date_from = datetime.strptime(date_from_str, "%Y-%m-%d").date()
+        except ValueError:
+            date_from = None
+    if date_to_str:
+        try:
+            date_to = datetime.strptime(date_to_str, "%Y-%m-%d").date()
+        except ValueError:
+            date_to = None
+    if date_from and date_to and date_from > date_to:
+        error = "Start date must be before end date."
+        date_from = date_to = None
+    if error:
+        flash(error, 'error')
+
+    # Helper to add date filter clause
+    def date_clause():
+        if date_from and date_to:
+            return " AND date BETWEEN ? AND ?", (date_from_str, date_to_str)
+        if date_from and not date_to:
+            return " AND date >= ?", (date_from_str,)
+        if date_to and not date_from:
+            return " AND date <= ?", (date_to_str,)
+        return "", ()
+
     # Total spent & transaction count
-    total_row = db.execute('SELECT SUM(amount) AS total, COUNT(*) AS cnt FROM expenses WHERE user_id = ?', (user_id,)).fetchone()
+    clause, params = date_clause()
+    total_row = db.execute(
+        f'SELECT SUM(amount) AS total, COUNT(*) AS cnt FROM expenses WHERE user_id = ?{clause}',
+        (user_id, *params)
+    ).fetchone()
     total_spent = total_row['total'] or 0
     tx_count = total_row['cnt'] or 0
 
     # Recent transactions (latest 5)
-    recent_tx = db.execute('SELECT date, description, category, amount FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT 5', (user_id,)).fetchall()
+    clause, params = date_clause()
+    recent_tx_rows = db.execute(
+        f'SELECT date, description, category, amount FROM expenses WHERE user_id = ?{clause} ORDER BY date DESC LIMIT 5',
+        (user_id, *params)
+    ).fetchall()
+    recent_tx = [dict(row) for row in recent_tx_rows]
+    # Fallback to unfiltered if filtered result empty
+    if date_from and date_to and not recent_tx:
+        recent_tx_rows = db.execute(
+            'SELECT date, description, category, amount FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT 5',
+            (user_id,)
+        ).fetchall()
+        recent_tx = [dict(row) for row in recent_tx_rows]
 
     # Category breakdown – amount and percentage
-    cat_rows = db.execute('SELECT category, SUM(amount) AS amt FROM expenses WHERE user_id = ? GROUP BY category', (user_id,)).fetchall()
+    clause, params = date_clause()
+    cat_rows = db.execute(
+        f'SELECT category, SUM(amount) AS amt FROM expenses WHERE user_id = ?{clause} GROUP BY category',
+        (user_id, *params)
+    ).fetchall()
+    # Fallback to unfiltered if filtered result empty
+    if date_from and date_to and not cat_rows:
+        cat_rows = db.execute(
+            'SELECT category, SUM(amount) AS amt FROM expenses WHERE user_id = ? GROUP BY category',
+            (user_id,)
+        ).fetchall()
     total_for_pct = total_spent or 1  # avoid division by zero
     category_breakdown = []
     for row in cat_rows:
@@ -111,6 +171,12 @@ def profile():
     # Top category (by amount)
     top_category = max(cat_rows, key=lambda r: r['amt'])['category'] if cat_rows else '—'
 
+    # Compute preset date ranges for template
+    today = datetime.today().date()
+    start_of_month = today.replace(day=1)
+    three_months_ago = (today - timedelta(days=90)).replace(day=1)
+    six_months_ago = (today - timedelta(days=180)).replace(day=1)
+
     return render_template(
         'profile.html',
         user=current_user,
@@ -119,6 +185,16 @@ def profile():
         top_category=top_category,
         recent_tx=recent_tx,
         category_breakdown=category_breakdown,
+        # Pass date filter state
+        date_from=date_from_str or '',
+        date_to=date_to_str or '',
+        # Preset ranges
+        this_month_start=start_of_month.isoformat(),
+        this_month_end=today.isoformat(),
+        last_3_months_start=three_months_ago.isoformat(),
+        last_3_months_end=today.isoformat(),
+        last_6_months_start=six_months_ago.isoformat(),
+        last_6_months_end=today.isoformat(),
     )
 
 @app.route("/expenses/add")
