@@ -53,8 +53,6 @@ def get_user_by_email(email):
 
 
 # Flask-Login user loader
-login_manager = LoginManager()
-
 @login_manager.user_loader
 def load_user(user_id):
     """Load user by ID for Flask-Login."""
