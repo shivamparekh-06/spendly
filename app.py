@@ -197,6 +197,11 @@ def profile():
         last_6_months_end=today.isoformat(),
     )
 
+@app.route("/analytics")
+@login_required
+def analytics():
+    return render_template("analytics.html")
+
 @app.route("/expenses/add")
 def add_expense():
     return "Add expense — coming in Step 7"
