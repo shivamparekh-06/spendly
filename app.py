@@ -197,9 +197,81 @@ def profile():
         last_6_months_end=today.isoformat(),
     )
 
-@app.route("/expenses/add")
+@app.route("/analytics")
+@login_required
+def analytics():
+    return render_template("analytics.html")
+
+@app.route("/expenses/add", methods=["GET", "POST"])
+@login_required
 def add_expense():
-    return "Add expense — coming in Step 7"
+    if request.method == "POST":
+        # Extract and validate form data
+        amount_raw = request.form.get("amount", "").strip()
+        category = request.form.get("category", "").strip()
+        date_str = request.form.get("date", "").strip()
+        description = request.form.get("description", "").strip() or None
+
+        # Basic validation
+        try:
+            amount = float(amount_raw)
+            if amount <= 0:
+                raise ValueError
+        except ValueError:
+            flash("Please enter a valid positive amount.", "error")
+            # Fall through to re-render with flashed error
+        else:
+            # Validate category against allowed list
+            allowed_categories = [
+                "Food & Dining",
+                "Transport",
+                "Shopping",
+                "Entertainment",
+                "Bills & Utilities",
+                "Healthcare",
+                "Education",
+                "Other",
+            ]
+            if category not in allowed_categories:
+                flash("Invalid category selected.", "error")
+            else:
+                # Validate date format
+                try:
+                    datetime.strptime(date_str, "%Y-%m-%d")
+                except ValueError:
+                    flash("Please provide a valid date.", "error")
+                else:
+                    # Insert expense using parameterised query
+                    db = get_db()
+                    db.execute(
+                        "INSERT INTO expenses (user_id, amount, category, date, description) VALUES (?, ?, ?, ?, ?)",
+                        (current_user.id, amount, category, date_str, description),
+                    )
+                    db.commit()
+                    flash("Expense added successfully.", "success")
+                    return redirect(url_for("profile"))
+        # If we reach here, there was a validation error – fall through to render the form again
+    else:
+        # GET request – set defaults
+        pass
+
+    # Render the add expense form
+    today = datetime.utcnow().date().isoformat()
+    categories = [
+        "Food & Dining",
+        "Transport",
+        "Shopping",
+        "Entertainment",
+        "Bills & Utilities",
+        "Healthcare",
+        "Education",
+        "Other",
+    ]
+    return render_template(
+        "add_expense.html",
+        today=today,
+        categories=categories,
+    )
 
 @app.route("/expenses/<int:id>/edit")
 def edit_expense(id):

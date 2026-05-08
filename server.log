@@ -6,6 +6,7 @@ Press CTRL+C to quit
  * Restarting with watchdog (windowsapi)
  * Debugger is active!
  * Debugger PIN: 132-668-640
+<<<<<<< HEAD
 127.0.0.1 - - [08/May/2026 23:41:30] "GET /expenses/add HTTP/1.1" 302 -
 127.0.0.1 - - [08/May/2026 23:41:30] "GET /login?next=/expenses/add HTTP/1.1" 200 -
 127.0.0.1 - - [08/May/2026 23:42:11] "GET /profile?date_from=2026-05-01&date_to=2026-05-08 HTTP/1.1" 200 -
@@ -95,3 +96,5 @@ E:\expense-tracker\expense-tracker\app.py:259: DeprecationWarning: datetime.date
  * Restarting with watchdog (windowsapi)
  * Debugger is active!
  * Debugger PIN: 132-668-640
+=======
+>>>>>>> 552a66eeb1301f5c4f48144e3336b980e1325388
