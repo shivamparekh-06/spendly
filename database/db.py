@@ -107,26 +107,36 @@ def seed_db():
     cur.execute("SELECT id FROM users WHERE email = ?", ("demo@spendly.com",))
     row = cur.fetchone()
     if row:
-        return  # Demo data already seeded
+        # Demo user exists - clear existing expenses to ensure consistent seed data
+        user_id = row['id']
+        conn.execute('DELETE FROM expenses WHERE user_id = ?', (user_id,))
+        conn.commit()
+        # Continue to (re)seed expenses below
+        demo_user_id = user_id
+    else:
+        # Insert demo user
+        password_hash = generate_password_hash("demo123")
+        cur.execute(
+            "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+            ("Demo User", "demo@spendly.com", password_hash),
+        )
+        demo_user_id = cur.lastrowid
 
-    # Insert demo user
-    password_hash = generate_password_hash("demo123")
-    cur.execute(
-        "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-        ("Demo User", "demo@spendly.com", password_hash),
-    )
-    user_id = cur.lastrowid
+    user_id = demo_user_id
 
     # Sample expenses across categories
     sample_expenses = [
-        (user_id, 2500.0, "Food", "2026-04-01", "Groceries"),
+        # Updated categories to match allowed list
+
+        (user_id, 2500.0, "Food & Dining", "2026-04-01", "Groceries"),
         (user_id, 1200.0, "Transport", "2026-04-03", "Metro pass"),
-        (user_id, 3000.0, "Bills", "2026-04-05", "Electricity bill"),
-        (user_id, 1500.0, "Health", "2026-04-07", "Pharmacy"),
+        (user_id, 3000.0, "Bills & Utilities", "2026-04-05", "Electricity bill"),
+        (user_id, 1500.0, "Healthcare", "2026-04-07", "Pharmacy"),
         (user_id, 2000.0, "Entertainment", "2026-04-10", "Movie tickets"),
         (user_id, 3500.0, "Shopping", "2026-04-12", "Clothes"),
         (user_id, 800.0, "Other", "2026-04-14", "Gift"),
-        (user_id, 500.0, "Food", "2026-04-15", "Lunch"),
+        (user_id, 500.0, "Food & Dining", "2026-04-15", "Lunch"),
+            (user_id, 750.0, "Transport", "2026-04-16", "Taxi"),
     ]
     cur.executemany(
         "INSERT INTO expenses (user_id, amount, category, date, description) VALUES (?, ?, ?, ?, ?)",
