@@ -1,0 +1,104 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/schemas/settings.schema.json",
+
+  "hooks": {
+
+    "PreToolUse": [
+
+      {
+        "description": "Hook 2: Block dangerous shell commands before they run",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/hook2_block_dangerous_commands.sh \"$CLAUDE_TOOL_INPUT_COMMAND\""
+          }
+        ]
+      },
+
+      {
+        "description": "Hook 3: Protect sensitive files from read/write access",
+        "matcher": "Read|Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/hook3_protect_sensitive_files.sh \"$CLAUDE_TOOL_INPUT_FILE_PATH\" \"read\""
+          }
+        ]
+      },
+
+      {
+        "description": "Hook 5: Telemetry — log pre-action event",
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/hook5_telemetry.sh \"$CLAUDE_TOOL_NAME\" \"$CLAUDE_TOOL_INPUT_FILE_PATH$CLAUDE_TOOL_INPUT_COMMAND\" \"pre\" \"ok\""
+          }
+        ]
+      }
+
+    ],
+
+    "PostToolUse": [
+
+      {
+        "description": "Hook 1: Auto-format and lint after any file edit",
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/hook1_format_lint.sh \"$CLAUDE_TOOL_INPUT_FILE_PATH\""
+          }
+        ]
+      },
+
+      {
+        "description": "Hook 3: Protect sensitive files — block writes",
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/hook3_protect_sensitive_files.sh \"$CLAUDE_TOOL_INPUT_FILE_PATH\" \"write\""
+          }
+        ]
+      },
+
+      {
+        "description": "Hook 4: Notify when task completes",
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/hook4_task_notification.sh \"$CLAUDE_TOOL_NAME completed: $CLAUDE_TOOL_INPUT_FILE_PATH$CLAUDE_TOOL_INPUT_COMMAND\" \"$CLAUDE_TOOL_NAME\""
+          }
+        ]
+      },
+
+      {
+        "description": "Hook 5: Telemetry — log post-action event",
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/hook5_telemetry.sh \"$CLAUDE_TOOL_NAME\" \"$CLAUDE_TOOL_INPUT_FILE_PATH$CLAUDE_TOOL_INPUT_COMMAND\" \"post\" \"ok\""
+          }
+        ]
+      }
+
+    ],
+
+    "Notification": [
+      {
+        "description": "Hook 4: Alert user when Claude needs attention or finishes",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/hook4_task_notification.sh \"$CLAUDE_NOTIFICATION_MESSAGE\" \"notification\""
+          }
+        ]
+      }
+    ]
+
+  }
+}
