@@ -1,0 +1,14 @@
+{
+  "commands": {
+    "test_feature": {
+      "description": "Write and run a full pytest suite for all Spendly features",
+      "pipeline": ["test-writer", "test-runner"],
+      "passthrough": true
+    },
+    "code_review": {
+      "description": "Run security audit + code quality review on the codebase",
+      "pipeline": ["security-reviewer", "quality-reviewer"],
+      "passthrough": true
+    }
+  }
+}
