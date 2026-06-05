@@ -138,17 +138,22 @@ def profile():
     # Recent transactions (latest 5)
     clause, params = date_clause()
     recent_tx_rows = db.execute(
-        f'SELECT date, description, category, amount FROM expenses WHERE user_id = ?{clause} ORDER BY date DESC LIMIT 5',
+        f'SELECT id, date, description, category, amount FROM expenses WHERE user_id = ?{clause} ORDER BY date DESC LIMIT 5',
         (user_id, *params)
     ).fetchall()
     recent_tx = [dict(row) for row in recent_tx_rows]
     # Fallback to unfiltered if filtered result empty
     if date_from and date_to and not recent_tx:
         recent_tx_rows = db.execute(
-            'SELECT date, description, category, amount FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT 5',
+            'SELECT id, date, description, category, amount FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT 5',
             (user_id,)
         ).fetchall()
         recent_tx = [dict(row) for row in recent_tx_rows]
+
+    # Debug: Print the structure of the first transaction
+    if recent_tx:
+        print(f"DEBUG: recent_tx[0] type: {type(recent_tx[0])}")
+        print(f"DEBUG: recent_tx[0] content: {recent_tx[0]}")
 
     # Category breakdown – amount and percentage
     clause, params = date_clause()
@@ -273,9 +278,97 @@ def add_expense():
         categories=categories,
     )
 
-@app.route("/expenses/<int:id>/edit")
+@app.route("/expenses/<int:id>/edit", methods=["GET", "POST"])
+@login_required
 def edit_expense(id):
-    return "Edit expense - coming in Step 8"
+    if request.method == "POST":
+        # Extract and validate form data
+        amount_raw = request.form.get("amount", "").strip()
+        category = request.form.get("category", "").strip()
+        date_str = request.form.get("date", "").strip()
+        description = request.form.get("description", "").strip() or None
+
+        # Basic validation
+        try:
+            amount = float(amount_raw)
+            if amount <= 0:
+                raise ValueError
+        except ValueError:
+            flash("Please enter a valid positive amount.", "error")
+            # Fall through to re-render with flashed error
+        else:
+            # Validate category against allowed list
+            allowed_categories = [
+                "Food & Dining",
+                "Transport",
+                "Shopping",
+                "Entertainment",
+                "Bills & Utilities",
+                "Healthcare",
+                "Education",
+                "Other",
+            ]
+            if category not in allowed_categories:
+                flash("Invalid category selected.", "error")
+            else:
+                # Validate date format
+                try:
+                    datetime.strptime(date_str, "%Y-%m-%d")
+                except ValueError:
+                    flash("Please provide a valid date.", "error")
+                else:
+                    # Update expense using parameterised query
+                    db = get_db()
+                    # First verify the expense belongs to current user
+                    expense = db.execute(
+                        "SELECT id FROM expenses WHERE id = ? AND user_id = ?",
+                        (id, current_user.id)
+                    ).fetchone()
+
+                    if expense:
+                        db.execute(
+                            "UPDATE expenses SET amount = ?, category = ?, date = ?, description = ? WHERE id = ? AND user_id = ?",
+                            (amount, category, date_str, description, id, current_user.id)
+                        )
+                        db.commit()
+                        flash("Expense updated successfully.", "success")
+                        return redirect(url_for("profile"))
+                    else:
+                        flash("Expense not found or access denied.", "error")
+        # If we reach here, there was a validation error – fall through to render the form again
+    else:
+        # GET request - fetch expense data for pre-filling form
+        db = get_db()
+        expense = db.execute(
+            "SELECT id, amount, category, date, description FROM expenses WHERE id = ? AND user_id = ?",
+            (id, current_user.id)
+        ).fetchone()
+
+        if not expense:
+            flash("Expense not found or access denied.", "error")
+            return redirect(url_for("profile"))
+
+        # Convert sqlite3.Row to dict for easier template access
+        expense = dict(expense)
+
+    # Render the edit expense form
+    today = datetime.utcnow().date().isoformat()
+    categories = [
+        "Food & Dining",
+        "Transport",
+        "Shopping",
+        "Entertainment",
+        "Bills & Utilities",
+        "Healthcare",
+        "Education",
+        "Other",
+    ]
+    return render_template(
+        "edit_expense.html",
+        expense=expense,
+        today=today,
+        categories=categories,
+    )
 
 @app.route("/expenses/<int:id>/delete")
 def delete_expense(id):
