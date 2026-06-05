@@ -16,6 +16,18 @@
         ]
       },
 
+    
+      {
+        "description": "Hook 6: Generate session summary before Claude uses tools",
+        "matcher": "start",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/hook6_session_summary.sh"
+          }
+        ]
+      },
+
       {
         "description": "Hook 3: Protect sensitive files from read/write access",
         "matcher": "Read|Write|Edit|MultiEdit",
