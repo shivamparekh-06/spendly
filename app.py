@@ -9,6 +9,7 @@ app.secret_key = 'dev-secret'  # In production, use a secure env variable
 # Initialize Flask-Login
 login_manager.init_app(app)
 
+
 # Initialize database
 with app.app_context():
     init_db()
@@ -370,9 +371,30 @@ def edit_expense(id):
         categories=categories,
     )
 
-@app.route("/expenses/<int:id>/delete")
+@app.route("/expenses/<int:id>/delete", methods=["GET", "POST"])
+@login_required
 def delete_expense(id):
-    return "Delete expense - coming in Step 9"
+    db = get_db()
+    # First verify the expense belongs to current user
+    expense = db.execute(
+        "SELECT id, amount, category, date, description FROM expenses WHERE id = ? AND user_id = ?",
+        (id, current_user.id)
+    ).fetchone()
+
+    if not expense:
+        flash("Expense not found or access denied.", "error")
+        return redirect(url_for("profile"))
+
+    if request.method == "POST":
+        # Delete the expense
+        db.execute("DELETE FROM expenses WHERE id = ? AND user_id = ?", (id, current_user.id))
+        db.commit()
+        flash("Expense deleted successfully.", "success")
+        return redirect(url_for("profile"))
+
+    # GET request: show confirmation page
+    expense = dict(expense)
+    return render_template("delete_expense.html", expense=expense)
 
 @app.route("/terms")
 def terms():

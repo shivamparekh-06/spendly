@@ -338,6 +338,45 @@ a { color: inherit; text-decoration: none; }
     color: var(--ink);
 }
 
+/* Action buttons for table */
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    margin: 0 2px;
+}
+.btn-action:focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+}
+.btn-edit {
+    background: transparent;
+    color: var(--color-secondary);
+    border: 1px solid var(--color-secondary);
+}
+.btn-edit:hover {
+    background: var(--color-secondary-light);
+    color: var(--ink);
+}
+.btn-delete {
+    background: var(--danger);
+    color: var(--paper);
+    border: none;
+}
+.btn-delete:hover {
+    background: var(--danger-light);
+    color: var(--ink);
+}
+
 /* ------------------------------------------------------------------ */
 /* Features section                                                    */
 /* ------------------------------------------------------------------ */
